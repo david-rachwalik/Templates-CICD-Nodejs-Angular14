@@ -11,8 +11,8 @@ variables:
   nodeVersion: '16' # '14.x'
   runtimeStack: 'NODE|16-lts'
   subscriptionName: 'Pay-As-You-Go' # Pipeline connection (ARM)
+  location: 'eastus' # 'southcentralus'
   resourceGroupName: 'rg-templates-cicd-nodejs-angular14'
-  location: 'southcentralus' # 'eastus'
   appServiceName: 'webapp-templates-cicd-nodejs-angular14' # web app name
   environmentName: 'Production'
   artifactName: 'drop'
