@@ -1,0 +1,170 @@
+# Node.js Express Web App to Linux on Azure
+# Build a Node.js Express app and deploy it to Azure as a Linux web app.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  - main
+
+variables:
+  vmImageName: 'ubuntu-latest' # agent VM image name
+  nodeVersion: '16' # '14.x'
+  runtimeStack: 'NODE|16-lts'
+  subscriptionName: 'Pay-As-You-Go' # Pipeline connection (ARM)
+  appServiceName: 'webapp-templates-cicd-nodejs-angular14' # web app name
+  environmentName: 'Production'
+  artifactName: 'drop'
+
+stages:
+  - stage: Build
+    displayName: Build stage
+    jobs:
+      - job: Build
+        displayName: Build
+        pool:
+          vmImage: $(vmImageName)
+        steps:
+          # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/cmd-line-v2
+          - script: |
+              echo Hello world
+              pwd
+            # pwd -> /home/vsts/work/1/s
+            displayName: 'Print working directory'
+
+          - task: NodeTool@0
+            displayName: 'Install Node.js'
+            inputs:
+              versionSpec: $(nodeVersion)
+
+          - script: npm install
+            displayName: 'Install app dependencies'
+
+          - script: npm run build
+            displayName: 'Build app (prod)'
+
+          # - script: npm run test --if-present
+          #   displayName: 'Test app'
+
+          - script: ls
+            displayName: 'List contents of working directory'
+
+          # # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/archive-files-v2
+          # - task: ArchiveFiles@2
+          #   displayName: 'Archive files'
+          #   inputs:
+          #     rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+          #     includeRootFolder: false
+          #     archiveType: zip
+          #     archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+          #     replaceExistingArchive: true
+
+          #     # # Exclude node_modules directory
+          #     # modifyArchPath: true
+          #     # archiveBaseDirectory: '.'
+          #     # # Exclude node_modules directory
+          #     # exclude: 'node_modules/**'
+
+          # - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+          #   artifact: drop
+
+          # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/copy-files
+          - task: CopyFiles@2
+            displayName: 'Copy files to staging'
+            inputs:
+              # sourceFolder: '$(workingDirectory)' # adds to end of working dir
+              # contents: |
+              #   **/*
+              #   !node_modules/**
+              # # !*.md
+              # # !*.yml
+              contents: |
+                server/**
+                dist/**
+                *
+              # targetFolder: $(Build.ArtifactStagingDirectory)
+              targetFolder: $(System.DefaultWorkingDirectory)/_$(artifactName)
+
+          # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/archive-files-v2
+          - task: ArchiveFiles@2
+            displayName: 'Archive files in staging'
+            inputs:
+              # rootFolderOrFile: $(Build.ArtifactStagingDirectory)
+              rootFolderOrFile: $(System.DefaultWorkingDirectory)/_$(artifactName)
+              includeRootFolder: false
+              archiveType: zip
+              archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+              replaceExistingArchive: true
+
+          # ------------------------ Artifact Publish Steps ------------------------
+          # Provide files to next stage
+          # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/publish-build-artifacts
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish build artifact: $(artifactName)'
+            inputs:
+              pathtoPublish: $(Build.ArtifactStagingDirectory)
+              artifactName: $(artifactName)
+
+          - script: ls $(Build.ArtifactStagingDirectory)
+            displayName: 'List contents of staging directory'
+
+  - stage: Deploy
+    displayName: Deploy stage
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - deployment: Deploy
+        displayName: Deploy
+        environment: $(environmentName)
+        pool:
+          vmImage: $(vmImageName)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Already handled automatically by Pipeline
+                # # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/download-build-artifacts-v1
+                # - task: DownloadBuildArtifacts@1
+                #   inputs:
+                #     buildType: 'current'
+                #     downloadType: 'single'
+                #     artifactName: '$(artifactName)'
+                #     downloadPath: '$(System.ArtifactsDirectory)'
+
+                # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/cmd-line-v2
+                - task: CmdLine@2
+                  displayName: 'Print pipeline directory'
+                  inputs:
+                    script: |
+                      echo --- $(Pipeline.Workspace) ---
+                      ls $(Pipeline.Workspace)
+                      echo --- $(Pipeline.Workspace)/$(artifactName) ---
+                      ls $(Pipeline.Workspace)/$(artifactName)
+                      echo $(Build.ArtifactStagingDirectory)
+                      echo $(System.DefaultWorkingDirectory)
+                  # pwd -> /home/vsts/work/1/s
+                  # $(Pipeline.Workspace) -> /home/vsts/work/1
+                  # $(Build.ArtifactStagingDirectory) -> /home/vsts/work/1/a
+                  # $(System.DefaultWorkingDirectory) -> /home/vsts/work/1/s
+
+                # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/azure-web-app-v1
+                - task: AzureWebApp@1
+                  displayName: 'Deploy web app'
+                  inputs:
+                    azureSubscription: '$(subscriptionName)'
+                    appType: 'webAppLinux' # webApp|webAppLinux
+                    appName: '$(appServiceName)'
+                    package: '$(Pipeline.Workspace)/$(artifactName)/$(Build.BuildId).zip'
+                    runtimeStack: '$(runtimeStack)'
+                    startUpCommand: 'npm start'
+                    deploymentMethod: 'auto'
+                    # ensure fully loaded and ready to serve requests before deployment is complete
+                    # additionalDeploymentOptions: '--warmup-path /'
+
+  # F1 (free) tier doesn't support deployment slots, cannot use deployment swaps with zero downtime
+  # can provide '--warmup-path' to AzureWebApp@1 task to reduce downtime
+
+  # While this can help to reduce downtime, there are a few downsides to using it:
+  # - Increased deployment time: Since the application is warmed up after deployment, the deployment time may be longer.
+  # - Increased load on the application: If a large number of requests are made to the warmup path, it can put additional load on the application, potentially impacting its performance.
+  # - Increased data transfer: Since requests are being made to warm up the application, there may be additional data transfer costs associated with the deployment.
+  # - Possible issues with caching: If the warmup path is not properly configured, it may not be properly cached, resulting in additional requests being made to the application after deployment.
