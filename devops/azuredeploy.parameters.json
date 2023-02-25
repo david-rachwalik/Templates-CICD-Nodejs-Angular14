@@ -9,7 +9,7 @@
       "value": "NODE|16-lts"
     },
     "repoUrl": {
-      "value": "https://github.com/david-rachwalik/Templates-CICD-Nodejs-Angular14"
+      "value": "https://github.com/david-rachwalik/Templates-CICD-Nodejs-Angular14.git"
     },
     "repoBranch": {
       "value": "main"

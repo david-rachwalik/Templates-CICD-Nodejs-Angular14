@@ -14,3 +14,9 @@ npm i -D eslint-config-prettier eslint-plugin-prettier
 npm i -D eslint-config-airbnb-base eslint-plugin-import eslint-config-airbnb-typescript
 npm i -D @typescript-eslint/eslint-plugin @typescript-eslint/parser
 ```
+
+[Prepare repository root for Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/deploy-local-git?tabs=cli#prepare-your-repository)
+
+- _Node.js:_ server.js, app.js, or package.json with a start script
+
+To [customize deployment](https://github.com/projectkudu/kudu/wiki/Customizing-deployments), include a `.deployment` file in the repository root

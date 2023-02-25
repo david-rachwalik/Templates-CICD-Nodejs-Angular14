@@ -114,9 +114,9 @@ stages:
                 - task: AzureResourceGroupDeployment@2
                   displayName: 'Deploy ARM template'
                   inputs:
-                    azureSubscription: '$(subscriptionName)'
-                    resourceGroupName: '$(resourceGroupName)'
-                    location: '$(location)'
+                    azureSubscription: $(subscriptionName)
+                    resourceGroupName: $(resourceGroupName)
+                    location: $(location)
                     # csmFile: '<path-to-arm-template-file>'
                     # csmParametersFile: '<path-to-arm-template-parameters-file>'
                     # overrideParameters: '-webAppName <web-app-name> -linuxFxVersion "NODE|14-lts" -repositoryUrl <repository-url> -branch <repository-branch> -isManualIntegration false'
@@ -124,18 +124,18 @@ stages:
                     # csmParametersFile: '$(Build.ArtifactStagingDirectory)/devops/azuredeploy.parameters.json'
                     # csmFile: '$(System.DefaultWorkingDirectory)/devops/azuredeploy.json'
                     # csmParametersFile: '$(System.DefaultWorkingDirectory)/devops/azuredeploy.parameters.json'
-                    csmFile: '$(Pipeline.Workspace)/$(artifactName)/devops/azuredeploy.json'
-                    csmParametersFile: '$(Pipeline.Workspace)/$(artifactName)/devops/azuredeploy.parameters.json'
+                    csmFile: $(Pipeline.Workspace)/$(artifactName)/devops/azuredeploy.json
+                    csmParametersFile: $(Pipeline.Workspace)/$(artifactName)/devops/azuredeploy.parameters.json
 
                 # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/azure-web-app-v1
                 - task: AzureWebApp@1
                   displayName: 'Deploy web app'
                   inputs:
-                    azureSubscription: '$(subscriptionName)'
+                    azureSubscription: $(subscriptionName)
                     appType: 'webAppLinux' # webApp|webAppLinux
-                    appName: '$(appServiceName)'
-                    package: '$(Pipeline.Workspace)/$(artifactName)/$(Build.BuildId).zip'
-                    runtimeStack: '$(runtimeStack)'
+                    appName: $(appServiceName)
+                    package: $(Pipeline.Workspace)/$(artifactName)/$(Build.BuildId).zip
+                    runtimeStack: $(runtimeStack)
                     startUpCommand: 'npm start'
                     deploymentMethod: 'auto'
                     # ensure fully loaded and ready to serve requests before deployment is complete
