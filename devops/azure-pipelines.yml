@@ -38,8 +38,6 @@ stages:
             displayName: 'Copy files to staging'
             inputs:
               contents: |
-                devops/azuredeploy.json
-                devops/azuredeploy.parameters.json
                 server/**
                 *
               targetFolder: $(System.DefaultWorkingDirectory)/_$(artifactName)
@@ -53,6 +51,14 @@ stages:
               archiveType: 'zip'
               archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
               replaceExistingArchive: true
+
+          - task: CopyFiles@2
+            displayName: 'Copy deployment to staging'
+            inputs:
+              contents: |
+                devops/azuredeploy.json
+                devops/azuredeploy.parameters.json
+              targetFolder: $(Build.ArtifactStagingDirectory)
 
           # ------------------------ Artifact Publish Steps ------------------------
           # Provide files to next stage
@@ -114,10 +120,10 @@ stages:
                     # csmFile: '<path-to-arm-template-file>'
                     # csmParametersFile: '<path-to-arm-template-parameters-file>'
                     # overrideParameters: '-webAppName <web-app-name> -linuxFxVersion "NODE|14-lts" -repositoryUrl <repository-url> -branch <repository-branch> -isManualIntegration false'
-                    # csmFile: '$(Build.ArtifactStagingDirectory)/devops/azuredeploy.json'
-                    # csmParametersFile: '$(Build.ArtifactStagingDirectory)/devops/azuredeploy.parameters.json'
-                    csmFile: '$(System.DefaultWorkingDirectory)/devops/azuredeploy.json'
-                    csmParametersFile: '$(System.DefaultWorkingDirectory)/devops/azuredeploy.parameters.json'
+                    csmFile: '$(Build.ArtifactStagingDirectory)/devops/azuredeploy.json'
+                    csmParametersFile: '$(Build.ArtifactStagingDirectory)/devops/azuredeploy.parameters.json'
+                    # csmFile: '$(System.DefaultWorkingDirectory)/devops/azuredeploy.json'
+                    # csmParametersFile: '$(System.DefaultWorkingDirectory)/devops/azuredeploy.parameters.json'
 
                 # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/azure-web-app-v1
                 - task: AzureWebApp@1
