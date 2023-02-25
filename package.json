@@ -5,7 +5,8 @@
   "scripts": {
     "start:bak": "node ./server/index.js",
     "server:bak": "nodemon ./server/index.js",
-    "start": "node ./server.js",
+    "start:bakprod": "node ./server.js",
+    "start": "pm2 start ./server.js --no-daemon",
     "server": "nodemon ./server.js"
   },
   "engines": {
