@@ -11,6 +11,8 @@ variables:
   nodeVersion: '16' # '14.x'
   runtimeStack: 'NODE|16-lts'
   subscriptionName: 'Pay-As-You-Go' # Pipeline connection (ARM)
+  resourceGroupName: 'rg-templates-cicd-nodejs-angular14'
+  location: 'southcentralus' # 'eastus'
   appServiceName: 'webapp-templates-cicd-nodejs-angular14' # web app name
   environmentName: 'Production'
   artifactName: 'drop'
@@ -36,6 +38,8 @@ stages:
             displayName: 'Copy files to staging'
             inputs:
               contents: |
+                devops/azuredeploy.json
+                devops/azuredeploy.parameters.json
                 server/**
                 *
               targetFolder: $(System.DefaultWorkingDirectory)/_$(artifactName)
@@ -100,6 +104,20 @@ stages:
                   # $(Pipeline.Workspace) -> /home/vsts/work/1
                   # $(Build.ArtifactStagingDirectory) -> /home/vsts/work/1/a
                   # $(System.DefaultWorkingDirectory) -> /home/vsts/work/1/s
+
+                - task: AzureResourceGroupDeployment@2
+                  displayName: 'Deploy ARM template'
+                  inputs:
+                    azureSubscription: '$(subscriptionName)'
+                    resourceGroupName: '$(resourceGroupName)'
+                    location: '$(location)'
+                    # csmFile: '<path-to-arm-template-file>'
+                    # csmParametersFile: '<path-to-arm-template-parameters-file>'
+                    # overrideParameters: '-webAppName <web-app-name> -linuxFxVersion "NODE|14-lts" -repositoryUrl <repository-url> -branch <repository-branch> -isManualIntegration false'
+                    # csmFile: '$(Build.ArtifactStagingDirectory)/devops/azuredeploy.json'
+                    # csmParametersFile: '$(Build.ArtifactStagingDirectory)/devops/azuredeploy.parameters.json'
+                    csmFile: '$(System.DefaultWorkingDirectory)/devops/azuredeploy.json'
+                    csmParametersFile: '$(System.DefaultWorkingDirectory)/devops/azuredeploy.parameters.json'
 
                 # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/azure-web-app-v1
                 - task: AzureWebApp@1
