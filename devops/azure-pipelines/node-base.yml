@@ -8,11 +8,13 @@ trigger:
 
 variables:
   vmImageName: 'ubuntu-latest' # agent VM image name
-  runtimeStack: 'NODE|16-lts'
+  runtimeStack: 'NODE|16-lts' # use LTS for Production
   subscriptionName: 'Pay-As-You-Go' # Pipeline connection (ARM)
+  location: 'eastus' # 'southcentralus'
+  resourceGroupName: 'rg-templates-cicd-nodejs-angular14'
   appServiceName: 'webapp-templates-cicd-nodejs-angular14' # web app name
-  environmentName: 'Production'
   artifactName: 'drop'
+  environmentName: 'Production'
 
 stages:
   - stage: 'Build'
@@ -48,6 +50,14 @@ stages:
               archiveType: 'zip'
               archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
               replaceExistingArchive: true
+
+          - task: CopyFiles@2
+            displayName: 'Copy deployment to staging'
+            inputs:
+              contents: |
+                devops/azuredeploy.json
+                devops/azuredeploy.parameters.json
+              targetFolder: $(Build.ArtifactStagingDirectory)
 
           # ------------------------ Artifact Publish Steps ------------------------
           # Provide files to next stage
@@ -93,6 +103,7 @@ stages:
                       ls $(Pipeline.Workspace)
                       echo --- $(Pipeline.Workspace)/$(artifactName) ---
                       ls $(Pipeline.Workspace)/$(artifactName)
+                      echo ---
                       echo $(Build.ArtifactStagingDirectory)
                       echo $(System.DefaultWorkingDirectory)
                   # pwd -> /home/vsts/work/1/s
@@ -100,25 +111,23 @@ stages:
                   # $(Build.ArtifactStagingDirectory) -> /home/vsts/work/1/a
                   # $(System.DefaultWorkingDirectory) -> /home/vsts/work/1/s
 
+                - task: AzureResourceGroupDeployment@2
+                  displayName: 'Deploy ARM template'
+                  inputs:
+                    azureSubscription: $(subscriptionName)
+                    resourceGroupName: $(resourceGroupName)
+                    location: $(location)
+                    csmFile: $(Pipeline.Workspace)/$(artifactName)/devops/azuredeploy.json
+                    csmParametersFile: $(Pipeline.Workspace)/$(artifactName)/devops/azuredeploy.parameters.json
+
                 # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/azure-web-app-v1
                 - task: AzureWebApp@1
                   displayName: 'Deploy web app'
                   inputs:
-                    azureSubscription: '$(subscriptionName)'
+                    azureSubscription: $(subscriptionName)
                     appType: 'webAppLinux' # webApp|webAppLinux
-                    appName: '$(appServiceName)'
-                    package: '$(Pipeline.Workspace)/$(artifactName)/$(Build.BuildId).zip'
-                    runtimeStack: '$(runtimeStack)'
+                    appName: $(appServiceName)
+                    package: $(Pipeline.Workspace)/$(artifactName)/$(Build.BuildId).zip
+                    runtimeStack: $(runtimeStack)
                     startUpCommand: 'npm start'
                     deploymentMethod: 'auto'
-                    # ensure fully loaded and ready to serve requests before deployment is complete
-                    # additionalDeploymentOptions: '--warmup-path /'
-
-  # F1 (free) tier doesn't support deployment slots, cannot use deployment swaps with zero downtime
-  # can provide '--warmup-path' to AzureWebApp@1 task to reduce downtime
-
-  # While this can help to reduce downtime, there are a few downsides to using it:
-  # - Increased deployment time: Since the application is warmed up after deployment, the deployment time may be longer.
-  # - Increased load on the application: If a large number of requests are made to the warmup path, it can put additional load on the application, potentially impacting its performance.
-  # - Increased data transfer: Since requests are being made to warm up the application, there may be additional data transfer costs associated with the deployment.
-  # - Possible issues with caching: If the warmup path is not properly configured, it may not be properly cached, resulting in additional requests being made to the application after deployment.

@@ -15,8 +15,17 @@ npm i -D eslint-config-airbnb-base eslint-plugin-import eslint-config-airbnb-typ
 npm i -D @typescript-eslint/eslint-plugin @typescript-eslint/parser
 ```
 
-[Prepare repository root for Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/deploy-local-git?tabs=cli#prepare-your-repository)
+[Prepare repository root for Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/deploy-local-git#prepare-your-repository)
 
 - _Node.js:_ server.js, app.js, or package.json with a start script
 
-To [customize deployment](https://github.com/projectkudu/kudu/wiki/Customizing-deployments), include a `.deployment` file in the repository root with `SCM_DO_BUILD_DURING_DEPLOYMENT=true`. The only viable alternative I found to the file is including the node_modules/ in the \*.zip.
+---
+
+[Enable/disable build actions](https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions)
+
+Depending on the type of site you are deploying and the deployment method you are using, Kudu will executes build steps on your site during deployment. The default for _zip_ deployments is false, and for all other deployment methods is true.
+
+Only viable options I found through testing:
+
+- If archiving the build, include the "node_modules" directory in the zip
+- [Customize the deployment](https://github.com/projectkudu/kudu/wiki/Customizing-deployments) by including a `.deployment` file at repository root with `SCM_DO_BUILD_DURING_DEPLOYMENT=true`
