@@ -8,7 +8,6 @@ trigger:
 
 variables:
   vmImageName: 'ubuntu-latest' # agent VM image name
-  nodeVersion: '16' # '14.x'
   runtimeStack: 'NODE|16-lts'
   subscriptionName: 'Pay-As-You-Go' # Pipeline connection (ARM)
   appServiceName: 'webapp-templates-cicd-nodejs-angular14' # web app name
