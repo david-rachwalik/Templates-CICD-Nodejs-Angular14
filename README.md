@@ -19,6 +19,4 @@ npm i -D @typescript-eslint/eslint-plugin @typescript-eslint/parser
 
 - _Node.js:_ server.js, app.js, or package.json with a start script
 
-To [customize deployment](https://github.com/projectkudu/kudu/wiki/Customizing-deployments), include a `.deployment` file in the repository root
-
-[Configure a Node.js app for Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/configure-language-nodejs#run-with-pm2)
+To [customize deployment](https://github.com/projectkudu/kudu/wiki/Customizing-deployments), include a `.deployment` file in the repository root with `SCM_DO_BUILD_DURING_DEPLOYMENT=true`. The only viable alternative I found to the file is including the node_modules/ in the \*.zip.

@@ -3,11 +3,10 @@
   "version": "2023.2.25",
   "private": true,
   "scripts": {
-    "start:bak": "node ./server/index.js",
-    "server:bak": "nodemon ./server/index.js",
-    "start:pm2": "pm2 start ./server.js --no-daemon",
-    "start": "node ./server.js",
-    "server": "nodemon ./server.js"
+    "start": "node ./server/index.js",
+    "server": "nodemon ./server/index.js",
+    "start:min": "node ./server.js",
+    "server:min": "nodemon ./server.js"
   },
   "engines": {
     "node": "^16"

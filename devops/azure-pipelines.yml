@@ -131,6 +131,3 @@ stages:
                     runtimeStack: $(runtimeStack)
                     startUpCommand: 'npm start'
                     deploymentMethod: 'auto'
-                    enableCustomDeployment: true
-                    # slotName: 'production'
-                    scmDoBuildDuringDeployment: true
