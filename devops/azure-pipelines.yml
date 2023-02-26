@@ -8,7 +8,7 @@ trigger:
 
 variables:
   vmImageName: 'ubuntu-latest' # agent VM image name
-  nodeVersion: '16' # '14.x'
+  # nodeVersion: '16' # '14.x'
   runtimeStack: 'NODE|16-lts' # use LTS for Production
   subscriptionName: 'Pay-As-You-Go' # Pipeline connection (ARM)
   location: 'eastus' # 'southcentralus'
@@ -33,22 +33,22 @@ stages:
             # pwd -> /home/vsts/work/1/s
             displayName: 'Print working directory'
 
-          - task: NodeTool@0
-            displayName: 'Install Node.js'
-            inputs:
-              versionSpec: $(nodeVersion)
+          # - task: NodeTool@0
+          #   displayName: 'Install Node.js'
+          #   inputs:
+          #     versionSpec: $(nodeVersion)
 
-          - script: npm install --production
-            displayName: 'Install app dependencies'
+          # - script: npm install --omit=dev
+          #   displayName: 'Install app dependencies'
 
           # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/copy-files
           - task: CopyFiles@2
             displayName: 'Copy files to staging'
             inputs:
               contents: |
-                node_modules/**
                 server/**
                 *
+              # node_modules/**
               targetFolder: $(System.DefaultWorkingDirectory)/_$(artifactName)
 
           # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/archive-files-v2
