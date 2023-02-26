@@ -3,19 +3,19 @@
   "version": "2023.2.25",
   "private": true,
   "scripts": {
-    "start:bak": "node ./server/index.js",
-    "server:bak": "nodemon ./server/index.js",
-    "start": "node ./server.js",
-    "server": "nodemon ./server.js"
+    "start": "node ./server/index.js",
+    "server": "nodemon ./server/index.js",
+    "start:min": "node ./server.js",
+    "server:min": "nodemon ./server.js"
   },
   "engines": {
     "node": "^16"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^6.10.0",
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^4.6.1"
+    "express": "^4.18.1",
+    "mongoose": "^6.5.2",
+    "swagger-jsdoc": "^6.2.5",
+    "swagger-ui-express": "^4.5.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.53.0",

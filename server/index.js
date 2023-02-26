@@ -46,8 +46,19 @@ const app = express();
 // --- Configure middleware ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../dist/nodebucket')));
-app.use('/', express.static(path.join(__dirname, '../dist/nodebucket')));
+// app.use(express.static(path.join(__dirname, '../dist/nodebucket')));
+// app.use('/', express.static(path.join(__dirname, '../dist/nodebucket')));
+
+// app.get('/', (req, res) => {
+//   res.send('Hello');
+// });
+
+app.get('/', (req, res) => {
+  res.send(`
+    <h1>Hello!</h1>
+    <p>Visit <a href="/api-docs">nodebucket API</a> for an example of OpenAPI docs.</p>
+  `);
+});
 
 // Configure OpenAPI/Swagger document library specification (https://swagger.io/specification)
 const options = {
