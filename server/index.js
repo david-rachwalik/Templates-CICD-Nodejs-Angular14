@@ -48,6 +48,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // app.use(express.static(path.join(__dirname, '../dist/nodebucket')));
 // app.use('/', express.static(path.join(__dirname, '../dist/nodebucket')));
+// app.use(express.static(path.join(__dirname, '../client-angular/dist/nodebucket')));
+// app.use('/', express.static(path.join(__dirname, '../client-angular/dist/nodebucket')));
 
 // app.get('/', (req, res) => {
 //   res.send('Hello');
