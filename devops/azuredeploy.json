@@ -85,6 +85,12 @@
           // Enable production-specific behavior, such as caching or error handling
           // https://docs.npmjs.com/cli/v8/commands/npm-install#omit
           "appSettings": [
+            // https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions
+            // https://github.com/projectkudu/kudu/wiki/Customizing-deployments
+            {
+              "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+              "value": "true"
+            },
             {
               "name": "NODE_ENV",
               "value": "production"
